@@ -1,0 +1,17 @@
+Mini LED RGBW PAR
+kompakter Bühnenscheinwerfer mit Quad-Color Farbmischung aus rot, grün, blau und neutralweiß
+geringe Abmessungen und die hochklassige LED-Bestückung machen den Mini Stage PAR zum idealen Werkzeug auf kleinen Bühnen und Produktionen
+durch das kompakte Design lässt er sich überall unauffällig platzieren und als Dekorationsbeleuchtung verwenden
+Technische Daten:
+Lichtquelle: 7 Stück 4 W LED RGBW Farbmischung (rot, grün, blau und weiß)
+Abstrahlwinkel: 30°
+Ansteuerung: DMX512 (4, 6 oder 8 Kanäle)
+Master / Slave
+Musik-Steuerung
+LC-Display mit vier Tasten
+DMX Ein- und Ausgang: dreipolig XLR
+Netzkabel mit Schutzkontaktstecker fest am Gerät montiert (Länge der Zuleitung ca. 80 cm)
+Gehäuse: Aluminium-Druckguss mit Doppelbügel
+Spannung: 110 V - 230 V AC, 50/60 HZ
+Abmessungen: 230 x 195 x 140 mm
+Gewicht: 1,9 kg

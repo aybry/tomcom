@@ -1,0 +1,31 @@
+{
+   "rep_pat": [
+      [
+         "Approx.",
+         "approx."
+      ],
+      [
+         " w ",
+         " W "
+      ],
+      [
+         " v ",
+         " V "
+      ],
+      [
+         " mw ",
+         " mW "
+      ]
+   ],
+   "shortname": "sam",
+   "browser": "f",
+   "login": {
+      "password": "Est4r4b1m!",
+      "email": "sam.o.bryson@gmail.com"
+   },
+   "sublime": true,
+   "db_path": "/home/{USERNAME}/Code/tomcom/data/dict",
+   "chrome_profile": "/home/samuelob/.config/google-chrome/Default",
+   "firefox_profile": "/home/aybry/.mozilla/firefox/kz8ba73s.selenium",
+   "credentials_json": "/home/aybry/Code/data/tomcom-3dc415fa30e6.json"
+}

@@ -1,0 +1,17 @@
+Mini LED RGBW PAR	google_translation
+Compact stage spotlight with quad-colour mixture of red, green, blue and neutral white	google_translation
+Small dimensions and the high-class LED equipment make the Mini Stage PAR the ideal tool on small stages and productions	google_translation
+Its compact design means it can be placed inconspicuously anywhere and used as decorative lighting	google_translation
+*Technical specifications:*
+Light source: 7 Pieces 4 W LED RGBW colour mixing (red, green, blue and white)	member_new
+Dispersion pattern: 30°
+Control: DMX512 (4, 6 or 8 channels)	member_new
+Master / slave	google_translation
+Music control	google_translation
+LC display with four buttons	google_translation
+DMX input and output: Three-pin XLR
+Mains cable with safety plug firmly mounted on the device (length of the supply line approx. 80 cm)	google_translation
+Housing: Die-cast aluminium with double bracket	member_new
+Tension: 110 V - 230 V AC, 50/60 HZ	member_new
+Dimensions: 230 x 195 x 140 mm
+Weight: 1.9 kg

@@ -1,0 +1,10 @@
+[
+  {
+        "domain": "language.thomann.de",
+        "name": "PHPSESSID",
+        "value": "",
+        "path": "/",
+        "httpOnly": false,
+        "secure": false
+  }
+]
