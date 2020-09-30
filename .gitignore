@@ -1,5 +1,8 @@
+*.pyc
 /.vscode
 *sam_dict.json
 /data/cookies.json
 /data/tc_config.json
+/data/*put.txt
+/data/stat*.txt
 *geckodriver.log

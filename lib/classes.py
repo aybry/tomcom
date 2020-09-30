@@ -308,68 +308,80 @@ class Line(object):
 
 
 class Lator(object):
-    def __init__(self, line):
-        self.line = line
+    def __init__(self, lines):
+        self.lines = lines
         self.cmd_dict = {'cat':    self.cat_translation,
                          'direct': self.direct_translation}
+        self.trans_w_google = []
 
     def run(self):
-        assert self.line.t_method in self.cmd_dict, "Unknown translation method: %s for line: %s"%(self.line.t_method.split('+')[0],self.line.source)
-        self.cmd_dict[self.line.t_method]()#start translation
+        for l_idx, line in enumerate(self.lines):
+            assert line.t_method in self.cmd_dict, "Unknown translation method: %s for line: %s"%(line.t_method.split('+')[0], line.source)
+            self.cmd_dict[line.t_method](line, l_idx)     # start translation
 
-        return Formatter(self.line).run()
+        texts_for_google = [line_tpl[1].source for line_tpl in self.trans_w_google]
 
-    def direct_translation(self):
-        tr_reps = diag.translate(self.line.source)
+        if len(texts_for_google) != 0:
+            g_trans_texts = self.google_translate(texts_for_google)
+            for (l_idx, _), text in zip(self.trans_w_google, g_trans_texts):
+                self.lines[l_idx].output = text
+
+        return [Formatter(line).run() for line in self.lines]
+
+    def direct_translation(self, line, l_idx):
+        tr_reps = diag.translate(line.source)
         tr_rep = tr_reps[0]
         if tr_rep[0]:
-            self.line.output = tr_rep[1] + tr_rep[2]
-            self.line.ok = True
+            line.output = tr_rep[1] + tr_rep[2]
+            line.ok = True
             if len(tr_reps[1:]) > 0:
-                self.line.alt += [tr[1] for tr in tr_reps[1:]]
+                line.alt += [tr[1] for tr in tr_reps[1:]]
         else:
-            self.line.save = True
-            self.line.output = self.google_translate(self.line.source)
-            self.line.commands.append('google_translation')
+            line.save = True
+            self.trans_w_google.append((l_idx, line))
+            # line.output = self.google_translate(line.source)
+            line.commands.append('google_translation')
 
-    def cat_translation(self):
+    def cat_translation(self, line, l_idx):
         #direct test in case this particular translation doesn't require a category in the english version
         # if diag.translate(self.line.source)[0]:
         #   self.direct_translation()
         #   return
-        ocrs = diag.translate(t.get_cat(self.line.source))#ocrs = output cat reports [[bool:translation_success,translation,flag,order],...] translate always returns, so ocrs[0] won't fail
+        ocrs = diag.translate(t.get_cat(line.source))#ocrs = output cat reports [[bool:translation_success,translation,flag,order],...] translate always returns, so ocrs[0] won't fail
         ocr = ocrs[0]
         o_cat = ocr[1].strip(': ')+': '#removes trailing ': ' and even ':'  removing and adding, to make sure, there is always only one.
 
-        omrs = diag.translate(t.get_cat_member(self.line.source))#omr = output member report
+        omrs = diag.translate(t.get_cat_member(line.source))#omr = output member report
         omr = omrs[0]
         o_member = t.cap_first(omr[1].strip())
 
         #adds flagged prompts if there are any
         l_msg = ''#line_message
 
-        if ocr[0] and len(ocr[2]) > 0: self.line.commands.append('cat_'+ocr[2].strip('\t'))
-        if omr[0] and len(omr[2]) > 0: self.line.commands.append('member_'+omr[2].strip('\t'))
+        if ocr[0] and len(ocr[2]) > 0: line.commands.append('cat_'+ocr[2].strip('\t'))
+        if omr[0] and len(omr[2]) > 0: line.commands.append('member_'+omr[2].strip('\t'))
 
         if ocr[0]: #if successful cat translation
-            self.line.output = o_cat
-            if len(ocrs) > 1: self.line.alt += list(set([tr[1] for tr in ocrs[1:]]))
+            line.output = o_cat
+            if len(ocrs) > 1: line.alt += list(set([tr[1] for tr in ocrs[1:]]))
         else:
-            self.line.save = True
-            self.line.commands.append('cat_new')
-            g_trans = self.google_translate(o_cat)
-            self.line.output = t.fds(g_trans).strip(': ')+': '
+            line.save = True
+            line.commands.append('cat_new')
+            self.trans_w_google.append((l_idx, line))
+            # g_trans = self.google_translate(o_cat)
+            # line.output = t.fds(g_trans).strip(': ') + ': '
 
         if omr[0]: #if successful member translation
-            self.line.output += o_member
-            if len(omrs) > 1: self.line.alt += list(set([tr[1] for tr in omrs[1:]]))
+            line.output += o_member
+            if len(omrs) > 1: line.alt += list(set([tr[1] for tr in omrs[1:]]))
         else:
-            self.line.save = True
-            o_member = self.google_translate(o_member)
-            self.line.output += t.fds(o_member)
-            self.line.commands.append('member_new')
+            line.save = True
+            self.trans_w_google.append((l_idx, line))
+            # o_member = self.google_translate(o_member)
+            # line.output += t.fds(o_member)
+            line.commands.append('member_new')
 
-        if ocr[0] and omr[0]: self.line.ok = True#if both translations have been successful, mark line as ok.
+        if ocr[0] and omr[0]: line.ok = True   # if both translations have been successful, mark line as ok.
 
 
     def by_word_translation(self,src=None):
@@ -380,21 +392,22 @@ class Lator(object):
         out_words = ' '.join([diag.translate(word)[0][1] for word in lookup_words])
         return t.nest(out_words,t.cap_first,t.fds,t.decimal_replace)
 
-    def google_translate(self, text):
+    def google_translate(self, lines_text):
         project_id = os.environ.get('PROJECT_ID')
         client = translate.TranslationServiceClient()
         parent = client.location_path(project_id, 'global')
 
         response = client.translate_text(
-            contents=[text],
-            target_language_code='en',
-            source_language_code='de',
-            parent=parent,
+            contents = lines_text,
+            target_language_code = 'en',
+            source_language_code = 'de',
+            parent = parent,
         )
 
-        translation = html.unescape(response.translations[0].translated_text)
+        translations = [G_Formatter(html.unescape(trsltn.translated_text)).run()
+                        for trsltn in response.translations]
 
-        return G_Formatter(translation).run()
+        return translations
 
 class Processor(object):
     def __init__(self, line, inp):

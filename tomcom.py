@@ -14,11 +14,11 @@ import lib.agents.storage as stag
 def main(main_window, manual_url=None):
 
     def translate_article():
-        for idx, line in enumerate(article.l_obj_ary):
-            ta = Lator(line)
-            article.l_obj_ary[idx] = ta.run()
+        article.l_obj_ary = Lator(article.l_obj_ary).run()
+
         translation_in_progress = not article.ready()
         return translation_in_progress
+
 
     def process_input(user_input_rows):
         if len(article.l_obj_ary) != len(user_input_rows):
