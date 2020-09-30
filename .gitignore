@@ -1,2 +1,5 @@
 /.vscode
 /geckodriver.log
+/data/dict/sam_dict.json
+/data/cookies.json
+/data/tc_config.json
