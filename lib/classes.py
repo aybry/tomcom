@@ -47,6 +47,9 @@ class Browser(object):
             if 'chrome_profile' in config:
                 options.add_argument("user-data-dir="+config['chrome_profile']) #Path to your chrome profile
                 options.add_argument("disable-infobars")
+                options.add_experimental_option("excludeSwitches", ["enable-automation"])
+                options.add_experimental_option('useAutomationExtension', False)
+
                 self.driver = webdriver.Chrome(chrome_options=options)
             else:
                 self.driver = webdriver.Chrome()
