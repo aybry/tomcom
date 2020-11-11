@@ -1,3 +1,6 @@
 clipboard
+requests
 pyquery
 selenium
+beautifulsoup4
+google-cloud-translate
