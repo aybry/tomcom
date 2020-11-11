@@ -342,7 +342,7 @@ class Lator(object):
                         text = text.strip(': ') + ': '
                         if text[0] == '*':
                             text.replace(': ', ':* ')
-                        self.lines[l_idx].output += text
+                        self.lines[l_idx].output = text + self.lines[l_idx].output
                     elif cat_mem == 'member':
                         self.lines[l_idx].output += text
 
