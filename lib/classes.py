@@ -197,10 +197,10 @@ class Article(object):
     def __init__(self, url):
         self.url = url
         self.src_was_formatted = True
-        self.l_obj_ary = [Line(line_dict) for line_dict in t.parse_url(url)]
-        self.lineCount = len(self.l_obj_ary)
+        self.l_obj_ary = [Line(line_dict) for line_dict in t.parse_url(url) if line_dict['line'] != '']
+        line_count = len(self.l_obj_ary)
         self.finished = False
-        if self.lineCount == 1:
+        if line_count == 1:
             self.src_was_formatted = False
             self.l_obj_ary = [Line(line_dict, False) for line_dict in t.parse_unformatted(self.l_obj_ary[0].source)]
         self.load_rules()
@@ -322,12 +322,34 @@ class Lator(object):
             assert line.t_method in self.cmd_dict, "Unknown translation method: %s for line: %s"%(line.t_method.split('+')[0], line.source)
             self.cmd_dict[line.t_method](line, l_idx)     # start translation
 
-        texts_for_google = [line_tpl[1].source for line_tpl in self.trans_w_google]
+        texts_for_google = []
+        for line_tpl in self.trans_w_google:
+            try:
+                texts_for_google.append(line_tpl[1].source)
+            except AttributeError:
+                assert line_tpl[2] in ['cat', 'member']
+                texts_for_google.append(line_tpl[1])
 
         if len(texts_for_google) != 0:
             g_trans_texts = self.google_translate(texts_for_google)
-            for (l_idx, _), text in zip(self.trans_w_google, g_trans_texts):
-                self.lines[l_idx].output = text
+            for google_input_tuple, text in zip(self.trans_w_google, g_trans_texts):
+                l_idx = google_input_tuple[0]
+
+                try:
+                    cat_mem = google_input_tuple[2]
+                    # If here, then translation comes from a cat/member line
+                    if cat_mem == 'cat':
+                        text = text.strip(': ') + ': '
+                        if text[0] == '*':
+                            text.replace(': ', ':* ')
+                        self.lines[l_idx].output += text
+                    elif cat_mem == 'member':
+                        self.lines[l_idx].output += text
+
+                except IndexError:
+                    # If here, then line is a standard line
+                    self.lines[l_idx].output = text
+                    pass
 
         return [Formatter(line).run() for line in self.lines]
 
@@ -346,45 +368,42 @@ class Lator(object):
             line.commands.append('google_translation')
 
     def cat_translation(self, line, l_idx):
-        #direct test in case this particular translation doesn't require a category in the english version
-        # if diag.translate(self.line.source)[0]:
-        #   self.direct_translation()
-        #   return
-        ocrs = diag.translate(t.get_cat(line.source))#ocrs = output cat reports [[bool:translation_success,translation,flag,order],...] translate always returns, so ocrs[0] won't fail
+        ocrs = diag.translate(t.get_cat(line.source))   # ocrs = output cat reports [[bool:translation_success,translation,flag,order],...] translate always returns, so ocrs[0] won't fail
         ocr = ocrs[0]
-        o_cat = ocr[1].strip(': ')+': '#removes trailing ': ' and even ':'  removing and adding, to make sure, there is always only one.
+        o_cat = ocr[1].strip(': ') + ': '   # removes trailing ': ' and even ':'  removing and adding, to make sure there is always only one.
 
-        omrs = diag.translate(t.get_cat_member(line.source))#omr = output member report
+        omrs = diag.translate(t.get_cat_member(line.source))    # omr = output member report
         omr = omrs[0]
         o_member = t.cap_first(omr[1].strip())
 
-        #adds flagged prompts if there are any
-        l_msg = ''#line_message
+        if ocr[0] and len(ocr[2]) > 0:
+            line.commands.append('cat_' + ocr[2].strip('\t'))
+        if omr[0] and len(omr[2]) > 0:
+            line.commands.append('member_' + omr[2].strip('\t'))
 
-        if ocr[0] and len(ocr[2]) > 0: line.commands.append('cat_'+ocr[2].strip('\t'))
-        if omr[0] and len(omr[2]) > 0: line.commands.append('member_'+omr[2].strip('\t'))
-
-        if ocr[0]: #if successful cat translation
-            line.output = o_cat
-            if len(ocrs) > 1: line.alt += list(set([tr[1] for tr in ocrs[1:]]))
+        line.output = ''
+        if ocr[0]:  # if successful cat translation
+            if o_cat[0] == '*':
+                o_cat = o_cat.replace(': ', ':* ')
+            line.output += o_cat
+            if len(ocrs) > 1:
+                line.alt += list(set([tr[1] for tr in ocrs[1:]]))
         else:
             line.save = True
             line.commands.append('cat_new')
-            self.trans_w_google.append((l_idx, line))
-            # g_trans = self.google_translate(o_cat)
-            # line.output = t.fds(g_trans).strip(': ') + ': '
+            self.trans_w_google.append((l_idx, o_cat, 'cat'))
 
-        if omr[0]: #if successful member translation
+        if omr[0]:  # if successful member translation
             line.output += o_member
-            if len(omrs) > 1: line.alt += list(set([tr[1] for tr in omrs[1:]]))
+            if len(omrs) > 1:
+                line.alt += list(set([tr[1] for tr in omrs[1:]]))
         else:
             line.save = True
-            self.trans_w_google.append((l_idx, line))
-            # o_member = self.google_translate(o_member)
-            # line.output += t.fds(o_member)
             line.commands.append('member_new')
+            self.trans_w_google.append((l_idx, o_member, 'member'))
 
-        if ocr[0] and omr[0]: line.ok = True   # if both translations have been successful, mark line as ok.
+        if ocr[0] and omr[0]:
+            line.ok = True   # if both translations were successful, mark line as ok.
 
 
     def by_word_translation(self,src=None):
@@ -398,7 +417,7 @@ class Lator(object):
     def google_translate(self, lines_text):
         project_id = os.environ.get('PROJECT_ID')
         client = translate.TranslationServiceClient()
-        parent = client.location_path(project_id, 'global')
+        parent = f"projects/{project_id}/locations/global"
 
         response = client.translate_text(
             contents = lines_text,

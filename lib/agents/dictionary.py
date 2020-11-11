@@ -24,6 +24,8 @@ def save(entries):
         keys = sorted(entry.keys())
         i = 0
         while i < len(entry):
+            if entry[keys[i]]['eng'][:1] == '* ':
+                entry[keys[i]]['eng'] = entry[keys[i]]['eng'][2:]
             print('\nSaving...')
             print('DE: ' + keys[i])
             print('EN: ' + json.dumps(entry[keys[i]]['eng'])[1:-1])
