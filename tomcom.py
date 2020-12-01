@@ -286,5 +286,8 @@ if __name__ == "__main__":
 
     print('TomCom is running.\nIf you want to quit, add a line with the letter q to your translation and save.\nHit ctrl+c at any time to terminate hard')
     while main_loop:
-        main_loop = main(main_window)
+        try:
+            main_loop = main(main_window)
+        except KeyboardInterrupt:
+            main_loop = False
     print('Good Bye!')
