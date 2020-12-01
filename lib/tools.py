@@ -135,7 +135,7 @@ def parse_url(url, array=False):
     # the array parameter switches:
         # True => returns a string array with the text of each line from the article
         # False => returns an array with Line objects for each line of the article
-    page = pq(url=url, encoding='utf-8')
+    page = pq(url=url, encoding='utf-8', headers={'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0'})
     if len(page('.rs-prod-text')) > 0:
         page = page('.rs-prod-text').children()
     elif len(page('.rs-prod-ltext')) > 0:
