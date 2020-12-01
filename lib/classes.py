@@ -84,13 +84,17 @@ class Browser(object):
             if len(self.driver.get_cookies()) > 0:
                 self.save_cookies()
 
-    def logged_in(self):
+    def logged_in(self, retried_once=False):
         self.open()
         try:
             self.driver.find_element_by_link_text("Orig. Page")
             return True
-        except (NoSuchElementException, e):
-            print("It seems like you are not logged in.")
+        except NoSuchElementException:
+            if not retried_once:
+                self.driver.refresh()
+                self.logged_in(True)
+            else:
+                print("It seems like you are not logged in.")
             return False
 
     def save_cookies(self):
