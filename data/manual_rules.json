@@ -43,7 +43,6 @@
       "odeling": "odelling",
       "Color": "Colour",
       " w ": " W ",
-      " Mm": " mm",
       " Cm": " cm",
       "watt": "Watt",
       "Aux": "AUX",
@@ -92,6 +91,7 @@
       "1 volume controls": "1 volume control",
       "1 Volume knobs": "1 Volume knob",
       "1 volume knobs": "1 volume knob",
+      " 1 Pieces": " 1 Piece",
       "Stand tom": "Floor tom",
       "stand tom": "floor tom",
       "@!Cee ": "@!CEE ",
@@ -99,9 +99,13 @@
       "15: 1": "15:1",
       "Cm": "cm",
       "Kg": "kg",
+      "KHz": "kHz",
+      " MW ": " mW ",
       " KOhm": " kOhm",
       " ohms": " Ohm",
+      " Mm": " mm",
       " X ": " x ",
+      " DB": " dB",
       "*Note: * ": "*Note:* ",
       "Chromed": "Chrome-plated",
       "chromed": "chrome-plated",
@@ -113,6 +117,8 @@
       "@!Led ": "@!LED ",
       "(daw)": "(DAW)",
       "\"- ": "\" - ",
+      ":* *": ":* ",
+      ":*:*": ":*",
       "www.w-distribution.de/Warranty": "https://shop.warwick.de/en/warrantyregistration"
    },
    "TOPLINE_REPLACEMENT_DICT": {
@@ -123,7 +129,7 @@
    },
    "CAREFUL_LIST": [
       "footbridge",
-      " MHz",
+      " MW",
       " MA",
       " meter",
       "suitcase"
